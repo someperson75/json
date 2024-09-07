@@ -2,7 +2,7 @@
 // header file
 // Author: @someperson75
 // Date: 07/09/2024
-// Version: 1.0
+// Version: 1.0.1
 // Description: json class for c++ with performs input and output on I/O stream
 
 #pragma once
