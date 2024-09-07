@@ -2,7 +2,7 @@
 // source file
 // Author: @someperson75
 // Date: 07/09/2024
-// Version: 1.0
+// Version: 1.0.1
 // Description: json class for c++ with performs input and output on I/O stream
 
 #include "JSON.h"
@@ -381,7 +381,7 @@ bool JSON::isBooleen() const
 
 std::string JSON::strigify(bool preaty, int level) const
 {
-    std::string line = "";
+    std::string line = " ";
     if (preaty)
     {
         line = "\n";
@@ -404,7 +404,8 @@ std::string JSON::strigify(bool preaty, int level) const
                 out += ',';
             out += line;
         }
-        out.pop_back();
+        if (preaty)
+            out.pop_back();
         out += '}';
         break;
     case 2:
@@ -417,7 +418,8 @@ std::string JSON::strigify(bool preaty, int level) const
                 out += ',';
             out += line;
         }
-        out.pop_back();
+        if (preaty)
+            out.pop_back();
         out += ']';
         break;
     case 3:

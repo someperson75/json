@@ -1,2 +1,1 @@
-# json
-json class for C++
+# Library json for C++
