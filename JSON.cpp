@@ -2,7 +2,7 @@
 // source file
 // Author: @someperson75
 // Date: 07/09/2024
-// Version: 1.0.1
+// Version: 1.1.3
 // Description: json class for c++ with performs input and output on I/O stream
 
 #include "JSON.h"
@@ -79,12 +79,12 @@ Object::Object()
     clear();
 }
 
-std::list<std::pair<const std::string, JSON>, std::allocator<std::pair<const std::string, JSON>>>::const_iterator Object::begin() const
+std::unordered_map<const std::string, JSON>::const_iterator Object::begin() const
 {
     return object.begin();
 }
 
-std::list<std::pair<const std::string, JSON>, std::allocator<std::pair<const std::string, JSON>>>::const_iterator Object::end() const
+std::unordered_map<const std::string, JSON>::const_iterator Object::end() const
 {
     return object.end();
 }
@@ -303,31 +303,15 @@ JSON &JSON::operator=(const bool val)
     return *this;
 }
 
-int &JSON::getInt()
+template <typename T>
+T &JSON::get(T n)
 {
-    if (type == 3)
-        return num;
-    else
-        throw Json_error("Type error : not an Integer.\n");
+    throw Json_error("Error : type " + typeid(T).name() + " is not allowed here.\n");
+    return T();
 }
 
-std::string &JSON::getString()
-{
-    if (type == 4)
-        return str;
-    else
-        throw Json_error("Type error : not a String.\n");
-}
-
-bool &JSON::getBool()
-{
-    if (type == 5)
-        return b;
-    else
-        throw Json_error("Type error : not a Boolean.\n");
-}
-
-Object &JSON::getObject()
+template <>
+Object &JSON::get<Object>(Object n)
 {
     if (type == 1)
         return object;
@@ -335,12 +319,40 @@ Object &JSON::getObject()
         throw Json_error("Type error : not an Object.\n");
 }
 
-Array &JSON::getArray()
+template <>
+Array &JSON::get<Array>(Array n)
 {
     if (type == 2)
         return array;
     else
         throw Json_error("Type error : not an Array.\n");
+}
+
+template <>
+int &JSON::get<int>(int n)
+{
+    if (type == 3)
+        return num;
+    else
+        throw Json_error("Type error : not an Integer.\n");
+}
+
+template <>
+bool &JSON::get<bool>(bool n)
+{
+    if (type == 5)
+        return b;
+    else
+        throw Json_error("Type error : not a Boolean.\n");
+}
+
+template <>
+std::string &JSON::get<std::string>(std::string n)
+{
+    if (type == 4)
+        return str;
+    else
+        throw Json_error("Type error : not a String.\n");
 }
 
 bool JSON::isNull() const
@@ -368,7 +380,7 @@ bool JSON::isString() const
     return type == 4;
 }
 
-bool JSON::isBooleen() const
+bool JSON::isBoolean() const
 {
     return type == 5;
 }

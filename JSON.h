@@ -2,7 +2,7 @@
 // header file
 // Author: @someperson75
 // Date: 07/09/2024
-// Version: 1.0.1
+// Version: 1.1.3
 // Description: json class for c++ with performs input and output on I/O stream
 
 #pragma once
@@ -15,10 +15,27 @@
 
 #ifndef JSON_lib
 #define JSON_lib
+#define JSON_version 01'01'03
 
 class Object;
 class Array;
 class JSON;
+
+#if JSON_version >= 02'00'00
+enum Type;
+
+enum Type
+{
+    integer,
+#if JSON_version > 03'00'00
+    double,
+#endif
+    string,
+    boolean,
+    object,
+    array
+};
+#endif
 
 class Json_error : public std::exception
 {
@@ -39,8 +56,8 @@ public:
     JSON &operator[](const std::string key);
     JSON &operator[](const char *key);
     Object &operator=(const Object &other);
-    std::list<std::pair<const std::string, JSON>, std::allocator<std::pair<const std::string, JSON>>>::const_iterator begin() const;
-    std::list<std::pair<const std::string, JSON>, std::allocator<std::pair<const std::string, JSON>>>::const_iterator end() const;
+    std::unordered_map<const std::string, JSON>::const_iterator begin() const;
+    std::unordered_map<const std::string, JSON>::const_iterator end() const;
     std::unordered_map<std::string, JSON> &values();
     Object();
 };
@@ -92,17 +109,19 @@ public:
     JSON &operator=(const std::string val);
     JSON &operator=(const char *val);
     JSON &operator=(const bool val);
-    Object &getObject();
-    Array &getArray();
-    int &getInt();
-    std::string &getString();
-    bool &getBool();
+    template <typename T>
+    T &get(T n = T());
+    Object &get(Object n = Object());
+    Array &get(Array n = Array());
+    int &get(int n = int());
+    std::string &get(std::string n = std::string());
+    bool &get(bool n = bool());
     bool isNull() const;
     bool isObject() const;
     bool isArray() const;
     bool isInteger() const;
     bool isString() const;
-    bool isBooleen() const;
+    bool isBoolean() const;
     std::string strigify(bool preaty = false, int level = 0) const;
 };
 #endif
