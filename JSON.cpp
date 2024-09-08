@@ -1,7 +1,7 @@
 // JSON library
 // source file
 // Author: @someperson75
-// Date: 07/09/2024
+// Date: 08/09/2024
 // Version: 3.0
 // Description: json class for c++ with performs input and output on I/O stream
 
