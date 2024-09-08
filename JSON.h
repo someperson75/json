@@ -2,7 +2,7 @@
 // header file
 // Author: @someperson75
 // Date: 07/09/2024
-// Version: 1.1.3
+// Version: 2.0
 // Description: json class for c++ with performs input and output on I/O stream
 
 #pragma once
@@ -15,27 +15,11 @@
 
 #ifndef JSON_lib
 #define JSON_lib
-#define JSON_version 01'01'03
+#define JSON_version 02'00'00
 
 class Object;
 class Array;
 class JSON;
-
-#if JSON_version >= 02'00'00
-enum Type;
-
-enum Type
-{
-    integer,
-#if JSON_version > 03'00'00
-    double,
-#endif
-    string,
-    boolean,
-    object,
-    array
-};
-#endif
 
 class Json_error : public std::exception
 {
@@ -84,17 +68,35 @@ std::istream &operator>>(std::istream &is, JSON &json);
 
 class JSON
 {
-    unsigned short type;
     Object object;
     Array array;
     int num;
     std::string str;
     bool b;
+#if JSON_version > 03'00'00
+    double d;
+#endif
+    enum Type
+    {
+        null,
+        obj,
+        arr,
+        integer,
+#if JSON_version > 03'00'00
+        double,
+#endif
+        string,
+        boolean,
+    };
+    Type type;
 
 public:
     void clear();
     JSON();
     JSON(const int num);
+#if JSON_version > 03'00'00
+    JSON(const double num);
+#endif
     JSON(const std::string str);
     JSON(const char *str);
     JSON(const bool b);
@@ -106,6 +108,9 @@ public:
     JSON &operator=(const Object val);
     JSON &operator=(const Array val);
     JSON &operator=(const int val);
+#if JSON_version > 03'00'00
+    JSON &operator=(const double val);
+#endif
     JSON &operator=(const std::string val);
     JSON &operator=(const char *val);
     JSON &operator=(const bool val);
@@ -114,12 +119,18 @@ public:
     Object &get(Object n = Object());
     Array &get(Array n = Array());
     int &get(int n = int());
+#if JSON_version > 03'00'00
+    double &get(double n = double());
+#endif
     std::string &get(std::string n = std::string());
     bool &get(bool n = bool());
     bool isNull() const;
     bool isObject() const;
     bool isArray() const;
     bool isInteger() const;
+#if JSON_version > 03'00'00
+    bool isDouble() const;
+#endif
     bool isString() const;
     bool isBoolean() const;
     std::string strigify(bool preaty = false, int level = 0) const;

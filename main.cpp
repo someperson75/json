@@ -16,8 +16,6 @@ int main()
 	// assigning a value into the array
 	json["a"][0] = false;
 
-	Object s = json.get<Object>();
-
 	// more options
 	{
 		json["a"][2] = "hello, world!"; // this resize the array to 3

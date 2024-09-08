@@ -2,7 +2,7 @@
 // source file
 // Author: @someperson75
 // Date: 07/09/2024
-// Version: 1.1.3
+// Version: 2.0
 // Description: json class for c++ with performs input and output on I/O stream
 
 #include "JSON.h"
@@ -160,9 +160,12 @@ void JSON::clear()
     object.clear();
     array.clear();
     num = 0;
+#if JSON_version > 03'00'00
+    d = 0.;
+#endif
     str = "";
     b = false;
-    type = 0;
+    type = Type::null;
 }
 
 JSON::JSON()
@@ -174,47 +177,56 @@ JSON::JSON(const Object object)
 {
     clear();
     this->object = object;
-    type = 1;
+    type = Type::obj;
 }
 
 JSON::JSON(const Array array)
 {
     clear();
     this->array = array;
-    type = 2;
+    type = Type::arr;
 }
 
 JSON::JSON(const int num)
 {
     clear();
     this->num = num;
-    type = 3;
+    type = Type::integer;
 }
+
+#if JSON_version > 03'00'00
+JSON::JSON(const double num)
+{
+    clear();
+    this->d = d;
+    type = Type::double;
+}
+#endif
 
 JSON::JSON(const std::string str)
 {
     clear();
     this->str = str;
-    type = 4;
+    type = Type::string;
 }
 
 JSON::JSON(const char *str)
 {
     clear();
     this->str = str;
-    type = 4;
+    type = Type::string;
 }
 
 JSON::JSON(const bool b)
 {
     clear();
     this->b = b;
-    type = 5;
+    type = Type::boolean;
 }
 
 JSON &JSON::operator[](const int id)
 {
-    if (type == 2)
+    if (type == Type::arr)
         return array[id];
     else
         throw Json_error("Type error : not an Array.\n");
@@ -222,7 +234,7 @@ JSON &JSON::operator[](const int id)
 
 JSON &JSON::operator[](const std::string &key)
 {
-    if (type == 1)
+    if (type == Type::obj)
         return object[key];
     else
         throw Json_error("Type error : not an Object.\n");
@@ -234,19 +246,24 @@ JSON &JSON::operator=(const JSON val)
     type = val.type;
     switch (type)
     {
-    case 1:
+    case Type::obj:
         object = val.object;
         break;
-    case 2:
+    case Type::arr:
         array = val.array;
         break;
-    case 3:
+    case Type::integer:
         num = val.num;
         break;
-    case 4:
+#if JSON_version > 03'00'00
+    case Type::double:
+        d = val.d;
+        break;
+#endif
+    case Type::string:
         str = val.str;
         break;
-    case 5:
+    case Type::boolean:
         b = val.b;
         break;
     default:
@@ -259,7 +276,7 @@ JSON &JSON::operator=(const Object val)
 {
     clear();
     object = val;
-    type = 1;
+    type = Type::obj;
     return *this;
 }
 
@@ -267,7 +284,7 @@ JSON &JSON::operator=(const Array val)
 {
     clear();
     array = val;
-    type = 2;
+    type = Type::arr;
     return *this;
 }
 
@@ -275,15 +292,24 @@ JSON &JSON::operator=(const int val)
 {
     clear();
     num = val;
-    type = 3;
+    type = Type::integer;
     return *this;
 }
+#if JSON_version > 03'00'00
+JSON &JSON::operator=(const double val)
+{
+    clear();
+    d = val;
+    type = Type::double;
+    return *this;
+}
+#endif
 
 JSON &JSON::operator=(const std::string val)
 {
     clear();
     str = val;
-    type = 4;
+    type = Type::string;
     return *this;
 }
 
@@ -291,7 +317,7 @@ JSON &JSON::operator=(const char *val)
 {
     clear();
     str = val;
-    type = 4;
+    type = Type::string;
     return *this;
 }
 
@@ -299,21 +325,21 @@ JSON &JSON::operator=(const bool val)
 {
     clear();
     b = val;
-    type = 5;
+    type = Type::boolean;
     return *this;
 }
 
 template <typename T>
 T &JSON::get(T n)
 {
-    throw Json_error((std::string)"Error : type " + typeid(T).name() + " is not allowed here.\n");
+    throw Json_error("Error : type " + typeid(T).name() + " is not allowed here.\n");
     return T();
 }
 
 template <>
 Object &JSON::get<Object>(Object n)
 {
-    if (type == 1)
+    if (type == Type::obj)
         return object;
     else
         throw Json_error("Type error : not an Object.\n");
@@ -322,7 +348,7 @@ Object &JSON::get<Object>(Object n)
 template <>
 Array &JSON::get<Array>(Array n)
 {
-    if (type == 2)
+    if (type == Type::arr)
         return array;
     else
         throw Json_error("Type error : not an Array.\n");
@@ -331,16 +357,26 @@ Array &JSON::get<Array>(Array n)
 template <>
 int &JSON::get<int>(int n)
 {
-    if (type == 3)
+    if (type == Type::integer)
         return num;
     else
         throw Json_error("Type error : not an Integer.\n");
 }
+#if JSON_version > 03'00'00
+template <>
+double &JSON::get<double>(double n)
+{
+    if (type == Type::double)
+        return d;
+    else
+        throw Json_error("Type error : not an Double.\n");
+}
+#endif
 
 template <>
 bool &JSON::get<bool>(bool n)
 {
-    if (type == 5)
+    if (type == Type::boolean)
         return b;
     else
         throw Json_error("Type error : not a Boolean.\n");
@@ -349,7 +385,7 @@ bool &JSON::get<bool>(bool n)
 template <>
 std::string &JSON::get<std::string>(std::string n)
 {
-    if (type == 4)
+    if (type == Type::string)
         return str;
     else
         throw Json_error("Type error : not a String.\n");
@@ -357,32 +393,38 @@ std::string &JSON::get<std::string>(std::string n)
 
 bool JSON::isNull() const
 {
-    return type == 0;
+    return type == Type::null;
 }
 
 bool JSON::isObject() const
 {
-    return type == 1;
+    return type == Type::obj;
 }
 
 bool JSON::isArray() const
 {
-    return type == 2;
+    return type == Type::arr;
 }
 
 bool JSON::isInteger() const
 {
-    return type == 3;
+    return type == Type::integer;
 }
+#if JSON_version > 03'00'00
+bool JSON::isDouble() const
+{
+    return type == Type::double;
+}
+#endif
 
 bool JSON::isString() const
 {
-    return type == 4;
+    return type == Type::string;
 }
 
 bool JSON::isBoolean() const
 {
-    return type == 5;
+    return type == Type::boolean;
 }
 
 ///////////////////////////
@@ -403,10 +445,10 @@ std::string JSON::strigify(bool preaty, int level) const
     std::string out = "";
     switch (type)
     {
-    case 0:
+    case Type::null:
         out = "null";
         break;
-    case 1:
+    case Type::obj:
         out += '{';
         out += line;
         for (auto iter = object.begin(); iter != object.end();)
@@ -420,7 +462,7 @@ std::string JSON::strigify(bool preaty, int level) const
             out.pop_back();
         out += '}';
         break;
-    case 2:
+    case Type::arr:
         out += '[';
         out += line;
         for (auto iter = array.begin(); iter != array.end();)
@@ -434,13 +476,18 @@ std::string JSON::strigify(bool preaty, int level) const
             out.pop_back();
         out += ']';
         break;
-    case 3:
+    case Type::integer:
         out = std::to_string(num);
         break;
-    case 4:
+#if JSON_version > 03'00'00
+    case Type::double:
+        out = std::to_string(d);
+        break;
+#endif
+    case Type::string:
         out = "\"" + str + "\"";
         break;
-    case 5:
+    case Type::boolean:
         out = b ? "true" : "false";
         break;
     default:
@@ -509,15 +556,33 @@ JSON readJSON(std::istream &is)
     {
         // integer
         int num = 0;
+#if JSON_version > 03'00'00
+        int divide = 0;
+#endif
         bool signe = (c == '-');
         char current = c < '0' ? is.get() : c;
-        while (current >= '0' && current <= '9')
+        while ((current >= '0' && current <= '9')
+#if JSON_version > 03'00'00
+               || current == '.'
+#endif
+        )
         {
             num *= 10;
+#if JSON_version > 03'00'00
+            divide *= 10;
+            if (current == '.' && divide != 0)
+                throw Json_error("Syntax error: there can't be two or more decimal point.\n");
+            if (current == '.')
+                divide = 1;
+#endif
             num += (current - '0');
             current = is.get();
         }
         is.unget();
+#if JSON_version > 03'00'00
+        if (divide != 0)
+            return JSON((double)(num * (signe ? -1 : 1)) / (double)divide);
+#endif
         return JSON(num * (signe ? -1 : 1));
     }
     else if (c == 't' || c == 'f')
