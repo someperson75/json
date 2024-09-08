@@ -16,6 +16,8 @@ int main()
 	// assigning a value into the array
 	json["a"][0] = false;
 
+	Object s = json.get<Object>();
+
 	// more options
 	{
 		json["a"][2] = "hello, world!"; // this resize the array to 3
@@ -31,7 +33,7 @@ int main()
 
 	// range based for-loop are accepted for Arrays and Objects
 	int i = 0;
-	for (JSON part : json["a"].getArray())
+	for (JSON part : json["a"].get<Array>())
 		std::cout << "Element number " << i++ << " of json[\"a\"] is : " << part.strigify() << std::endl;
 
 	// print the json data in one line
