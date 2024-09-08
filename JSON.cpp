@@ -2,7 +2,7 @@
 // source file
 // Author: @someperson75
 // Date: 07/09/2024
-// Version: 2.0
+// Version: 3.0
 // Description: json class for c++ with performs input and output on I/O stream
 
 #include "JSON.h"
@@ -160,9 +160,7 @@ void JSON::clear()
     object.clear();
     array.clear();
     num = 0;
-#if JSON_version > 03'00'00
     d = 0.;
-#endif
     str = "";
     b = false;
     type = Type::null;
@@ -194,14 +192,12 @@ JSON::JSON(const int num)
     type = Type::integer;
 }
 
-#if JSON_version > 03'00'00
 JSON::JSON(const double num)
 {
     clear();
     this->d = d;
-    type = Type::double;
+    type = Type::floatNum;
 }
-#endif
 
 JSON::JSON(const std::string str)
 {
@@ -255,11 +251,9 @@ JSON &JSON::operator=(const JSON val)
     case Type::integer:
         num = val.num;
         break;
-#if JSON_version > 03'00'00
-    case Type::double:
+    case Type::floatNum:
         d = val.d;
         break;
-#endif
     case Type::string:
         str = val.str;
         break;
@@ -295,15 +289,14 @@ JSON &JSON::operator=(const int val)
     type = Type::integer;
     return *this;
 }
-#if JSON_version > 03'00'00
+
 JSON &JSON::operator=(const double val)
 {
     clear();
     d = val;
-    type = Type::double;
+    type = Type::floatNum;
     return *this;
 }
-#endif
 
 JSON &JSON::operator=(const std::string val)
 {
@@ -332,7 +325,7 @@ JSON &JSON::operator=(const bool val)
 template <typename T>
 T &JSON::get(T n)
 {
-    throw Json_error((std::string)"Error : type " + typeid(T).name() + " is not allowed here.\n");
+    throw Json_error((std::string) "Error : type " + typeid(T).name() + " is not allowed here.\n");
     return T();
 }
 
@@ -362,16 +355,15 @@ int &JSON::get<int>(int n)
     else
         throw Json_error("Type error : not an Integer.\n");
 }
-#if JSON_version > 03'00'00
+
 template <>
 double &JSON::get<double>(double n)
 {
-    if (type == Type::double)
+    if (type == Type::floatNum)
         return d;
     else
         throw Json_error("Type error : not an Double.\n");
 }
-#endif
 
 template <>
 bool &JSON::get<bool>(bool n)
@@ -410,12 +402,11 @@ bool JSON::isInteger() const
 {
     return type == Type::integer;
 }
-#if JSON_version > 03'00'00
+
 bool JSON::isDouble() const
 {
-    return type == Type::double;
+    return type == Type::floatNum;
 }
-#endif
 
 bool JSON::isString() const
 {
@@ -448,6 +439,7 @@ std::string JSON::strigify(bool preaty, int level) const
     case Type::null:
         out = "null";
         break;
+
     case Type::obj:
         out += '{';
         out += line;
@@ -462,6 +454,7 @@ std::string JSON::strigify(bool preaty, int level) const
             out.pop_back();
         out += '}';
         break;
+
     case Type::arr:
         out += '[';
         out += line;
@@ -476,20 +469,23 @@ std::string JSON::strigify(bool preaty, int level) const
             out.pop_back();
         out += ']';
         break;
+
     case Type::integer:
         out = std::to_string(num);
         break;
-#if JSON_version > 03'00'00
-    case Type::double:
+
+    case Type::floatNum:
         out = std::to_string(d);
         break;
-#endif
+
     case Type::string:
         out = "\"" + str + "\"";
         break;
+
     case Type::boolean:
         out = b ? "true" : "false";
         break;
+
     default:
         break;
     }
@@ -556,33 +552,23 @@ JSON readJSON(std::istream &is)
     {
         // integer
         int num = 0;
-#if JSON_version > 03'00'00
         int divide = 0;
-#endif
         bool signe = (c == '-');
         char current = c < '0' ? is.get() : c;
-        while ((current >= '0' && current <= '9')
-#if JSON_version > 03'00'00
-               || current == '.'
-#endif
-        )
+        while ((current >= '0' && current <= '9') || current == '.')
         {
             num *= 10;
-#if JSON_version > 03'00'00
             divide *= 10;
             if (current == '.' && divide != 0)
                 throw Json_error("Syntax error: there can't be two or more decimal point.\n");
             if (current == '.')
                 divide = 1;
-#endif
             num += (current - '0');
             current = is.get();
         }
         is.unget();
-#if JSON_version > 03'00'00
         if (divide != 0)
             return JSON((double)(num * (signe ? -1 : 1)) / (double)divide);
-#endif
         return JSON(num * (signe ? -1 : 1));
     }
     else if (c == 't' || c == 'f')
@@ -640,12 +626,14 @@ JSON readJSON(std::istream &is)
                 last = current, current = is.get();
             }
             ExtractNotInterestingChar(is);
-            if (char c = is.get(); c != ':')
+            char c = is.get();
+            if (c != ':')
                 throw Json_error((std::string) "Syntax error : Unknow symbol '" + c + "'.\n");
             JSON obj = readJSON(is);
             o[str] = obj;
             ExtractNotInterestingChar(is);
-            if (char end = is.get(); end == '}')
+            char end = is.get();
+            if (end == '}')
                 break;
             else if (end != ',')
                 throw Json_error((std::string) "Syntax error : Unknow symbol '" + end + "'.\n");
@@ -661,7 +649,8 @@ JSON readJSON(std::istream &is)
             JSON obj = readJSON(is);
             a += obj;
             ExtractNotInterestingChar(is);
-            if (char end = is.get(); end == ']')
+            char end = is.get();
+            if (end == ']')
                 break;
             else if (end != ',')
                 throw Json_error((std::string) "Syntax error : Unknow symbol '" + end + "'.\n");
