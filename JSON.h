@@ -31,41 +31,6 @@ public:
     virtual const char *what() const noexcept;
 };
 
-class Object
-{
-    std::unordered_map<std::string, JSON> object;
-
-public:
-    void clear();
-    JSON &operator[](const std::string key);
-    JSON &operator[](const char *key);
-    Object &operator=(const Object &other);
-    std::unordered_map<const std::string, JSON>::const_iterator begin() const;
-    std::unordered_map<const std::string, JSON>::const_iterator end() const;
-    std::unordered_map<std::string, JSON> &values();
-    Object();
-};
-
-class Array
-{
-    std::vector<JSON> array;
-
-public:
-    void clear();
-    JSON &operator[](const long long id);
-    Array &operator=(const Array &other);
-    Array &push_back(const JSON &val);
-    Array &operator+=(const JSON &val);
-    std::vector<JSON> &values();
-    std::vector<JSON>::const_iterator begin() const;
-    std::vector<JSON>::const_iterator end() const;
-    Array();
-};
-
-std::ostream &operator<<(std::ostream &os, const JSON &json);
-JSON readJSON(std::istream &is);
-std::istream &operator>>(std::istream &is, JSON &json);
-
 class JSON
 {
     Object object;
@@ -123,4 +88,39 @@ public:
     bool isBoolean() const;
     std::string strigify(bool preaty = false, int level = 0) const;
 };
+
+class Object
+{
+    std::unordered_map<std::string, JSON> object;
+
+public:
+    void clear();
+    JSON &operator[](const std::string key);
+    JSON &operator[](const char *key);
+    Object &operator=(const Object &other);
+    std::unordered_map<const std::string, JSON>::const_iterator begin() const;
+    std::unordered_map<const std::string, JSON>::const_iterator end() const;
+    std::unordered_map<std::string, JSON> &values();
+    Object();
+};
+
+class Array
+{
+    std::vector<JSON> array;
+
+public:
+    void clear();
+    JSON &operator[](const long long id);
+    Array &operator=(const Array &other);
+    Array &push_back(const JSON &val);
+    Array &operator+=(const JSON &val);
+    std::vector<JSON> &values();
+    std::vector<JSON>::const_iterator begin() const;
+    std::vector<JSON>::const_iterator end() const;
+    Array();
+};
+
+std::ostream &operator<<(std::ostream &os, const JSON &json);
+JSON readJSON(std::istream &is);
+std::istream &operator>>(std::istream &is, JSON &json);
 #endif
