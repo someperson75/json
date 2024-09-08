@@ -332,7 +332,7 @@ JSON &JSON::operator=(const bool val)
 template <typename T>
 T &JSON::get(T n)
 {
-    throw Json_error("Error : type " + typeid(T).name() + " is not allowed here.\n");
+    throw Json_error((std::string)"Error : type " + typeid(T).name() + " is not allowed here.\n");
     return T();
 }
 
